@@ -144,4 +144,8 @@ async def store_full_session():
         "summary": summary,
         "full_log": log_text,
         "timestamp": timestamp_now()
+<<<<<<< HEAD
     })
+=======
+    })
+>>>>>>> 2b1fee63c9404b9071e12570cad9309816de13a5
