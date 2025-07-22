@@ -145,3 +145,46 @@ async def store_full_session():
         "full_log": log_text,
         "timestamp": timestamp_now()
     })
+    
+
+@cl.on_chat_end
+async def store_full_session():
+    chat_history = cl.user_session.get("chat_history") or []
+    if not chat_history:
+        return
+
+    # Full readable chat log
+    log_text = "\n".join(
+        f"[{m['timestamp']}] {m['role'].capitalize()}: {m['content']}"
+        for m in chat_history
+    )
+
+    # Title generation
+    title_prompt = [
+        {"role": "system", "content": "Write a short 5–8 word title for this chat."},
+        {"role": "user", "content": log_text}
+    ]
+    title_response = client.chat.completions.create(
+        model=DEPLOYMENT_NAME,
+        messages=title_prompt
+    )
+    title = title_response.choices[0].message.content.strip()
+
+    # Summary generation
+    summary_prompt = [
+        {"role": "system", "content": "Summarize this chat in 1–2 short sentences."},
+        {"role": "user", "content": log_text}
+    ]
+    summary_response = client.chat.completions.create(
+        model=DEPLOYMENT_NAME,
+        messages=summary_prompt
+    )
+    summary = summary_response.choices[0].message.content.strip()
+
+    # Save to file
+    save_global_session({
+        "title": title,
+        "summary": summary,
+        "full_log": log_text,
+        "timestamp": timestamp_now()
+    })
